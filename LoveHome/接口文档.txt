@@ -1,0 +1,384 @@
+1/生成图片验证码
+请求URL:/api/v1.0/imagecode/<image_code_id>
+请求方法:GET
+数据格式:image
+示例:
+    response = make_response(image)
+    response.headers['Content-Type'] = 'image/jpg'
+                                        'application/json'
+
+请求参数:
+参数名             是否必须        参数描述
+image_code_id       是           图片验证码的扩展名(UUID)
+
+返回结果:
+正确:
+response = make_response(image)
+response.headers['Content-Type'] = 'image/jpg'
+return response
+错误:
+{
+    errno=RET.DBERR,
+    errmsg='保存图片验证码失败'
+}
+
+2/发送短信验证码
+请求URL:/api/v1.0/smscode/<mobile>&text=imagecode&id=image_code_id
+请求方法:GET
+数据格式:json
+请求参数:
+参数名         是否必须        参数描述
+mobile          是           用户输入的手机号
+text            是           用户输入的图片验证码内容
+id              是           图片验证码的扩展名(UUID)
+
+返回结果:
+正确:
+{
+    errno=RET.OK,
+    errmsg='发送成功'
+}
+错误:
+{
+    errno=RET.THIRDERR,
+    errmsg='发送失败'
+}
+
+
+3/用户注册
+请求URL:/api/v1.0/users
+请求方法:POST
+数据格式:json
+请求参数:
+参数名         是否必须        参数描述
+mobile           是          用户输入的注册手机号
+sms_code         是          用户输入短信验证码
+password         是          用户输入的密码信息
+
+返回结果:
+正确:
+{
+    errno=RET.OK,
+    errmsg='注册成功',
+    data=user.to_dict()
+}
+错误:
+{
+    errno=RET.DBERR,
+    errmsg='保存用户信息失败'
+}
+
+
+4/用户登陆
+请求URL:/api/v1.0/sessions
+请求方法:POST
+数据格式:json
+请求参数:
+参数名         是否必须        参数描述
+mobile          是           用户输入的登陆用户名
+password        是           用户输入的登陆密码
+
+返回结果:
+正确:
+{
+    errno=RET.OK,
+    errmsg='OK',
+    data={'user_id':user.id}
+}
+错误:
+{
+    errno=RET.DATAERR,
+    errmsg='用户名或密码错误'
+}
+
+5/获取用户信息
+请求URL:/api/v1.0/user
+请求方法:GET
+数据格式:json
+请求参数:无参
+
+返回结果:
+正确:
+{
+    errno=RET.OK,
+    errmsg='OK',
+    data=user.to_dict()
+}
+错误:
+{
+    errno=RET.NODATA,
+    errmsg='无效操作'
+}
+
+
+6/修改用户信息
+请求URL:/api/v1.0/user/name
+请求方法:PUT
+数据格式:json
+请求参数:
+参数名         是否必须        参数描述
+name            是           用户输入修改后的用户名信息
+
+返回结果:
+正确:
+{
+    errno=RET.OK,
+    errmsg='OK',
+    data={'name':name}
+}
+
+错误:
+{
+    errno=RET.DBERR,
+    errmsg='保存用户信息失败'
+}
+
+7/上传用户头像
+请求URL:/api/v1.0/user/avatar
+请求方法:POST
+数据格式:图片文件
+请求参数:
+示例:request.files获取文件
+参数名         是否必须        参数描述
+avatar          是           用户选择的头像文件
+
+返回结果:
+正确:image_url(绝对路径) = 七牛云的外链域名 + 图片名称(调用七牛云返回的结果)
+{
+    errno=RET.OK,
+    errmsg='OK',
+    data={'avatar_url':image_url}
+}
+错误:
+{
+    errno=RET.THIRDERR,
+    errmsg='七牛云上传失败'
+}
+
+
+8/实名认证
+请求URL:/api/v1.0/user/auth
+请求方法:POST
+数据格式:json
+请求参数:
+参数名         是否必须        参数描述
+real_name       是           用户输入的真实姓名
+id_card         是           用户输入的身份证号码
+
+返回结果:
+正确:
+{
+    errno=RET.OK,
+    errmsg='OK'
+}
+错误:
+{
+    errno=RET.DBERR,
+    errmsg='保护用户实名信息失败'
+}
+
+
+9/获取实名信息
+请求URL:/api/v1.0/user/auth
+请求方法:GET
+数据格式:json
+请求参数:无参
+返回结果:
+正确:
+{
+    errno=RET.OK,
+    errmsg='OK',
+    data=user.auth_to_dict()
+}
+错误:
+{
+    errno=RET.NODATA,
+    errmsg='无效操作'
+}
+
+
+10/退出
+请求URL:/api/v1.0/session
+请求方法:DELETE
+数据格式:json
+请求参数:无参
+返回结果:
+{
+    errno=RET.OK,
+    errmsg='OK'
+}
+
+11/获取区域信息
+请求URL:/api/v1.0/areas
+请求方法:GET
+数据格式:json
+请求参数:无参
+
+返回结果:
+正确:
+示例:
+return jsonify(errno=RET.OK,errmsg='OK',data=areas_json)
+
+resp = '{"errno":0,"errmsg":"OK","data":%s}' % areas_json
+return resp
+
+错误:
+{
+    errno=RET.DBERR,
+    errmsg='获取区域信息失败'
+}
+
+12/发布新房源
+请求URL:/api/v1.0/houses
+请求方法:POST
+数据格式:json
+请求参数:
+参数名         是否必须            参数描述
+title           是               房屋标题
+price           是               房屋价格
+area_id         是               房屋城区
+address         是               房屋详细地址
+room_count      是               房屋数目
+acreage         是               房屋面积
+unit            是               房屋户型
+capacity        是               适住人数
+beds            是               卧床配置
+deposit         是               房屋押金
+min_days        是               房屋最少入住天数
+max_days        是               房屋最多入住天数
+facility        否               房屋配套设施
+
+返回结果:
+正确:
+{
+    errno=RET.OK,
+    errmsg='OK',
+    data={'house_id':house.id}
+}
+
+错误:
+{
+    errno=RET.DATAERR,
+    errmsg='价格转换错误'
+}
+
+13/保存房屋图片
+请求URL:/api/v1.0/houses/<house_id>/images
+请求方法:POST
+数据格式:json
+请求参数:
+参数名         是否必须        参数描述
+house_image     是           用户上传的房屋图片
+house_id        是           房屋的id
+
+返回结果:
+正确:
+{
+    errno=RET.OK,
+    errmsg='OK',
+    data={'url':image_url}
+}
+
+错误:
+{
+    errno=RET.DBERR,
+    errmsg='查询房屋数据失败'
+}
+
+
+14/获取用户发布的房屋信息
+请求URL:/api/v1.0/user/houses
+请求方法:GET
+数据格式:json
+请求参数:无参
+返回结果:
+正确:
+{
+    errno=RET.OK,
+    errmsg='OK'
+    data={"houses":houses_list}
+}
+
+错误:
+{
+    errno=RET.DBERR,
+    errmsg='查询房屋数据异常'
+}
+
+15/检查用户的登陆状态
+请求URL:/api/v1.0/session
+请求方法:GET
+数据格式:json
+请求参数:无参
+返回结果:
+正确:
+{
+    errno=RET.OK,
+    errmsg='true',
+    data={"name":name}
+}
+
+错误:
+{
+    errno=RET.SESSIONERR,
+    errmsg='false'
+}
+
+
+16/项目首页幻灯片信息展示
+请求URL:/api/v1.0/houses/index
+请求方法:GET
+数据格式:json
+请求参数:无参
+返回结果:
+正确:
+return '{"errno":0,"errmsg":"OK","data":%s}' % houses_json
+
+错误:
+{
+    errno=RET.DBERR,
+    errmsg='查询房屋数据失败'
+}
+
+17/房屋详情页面信息展示
+请求URL:/api/v1.0/houses/<house_id>
+请求方法:GET
+数据格式:json
+请求参数:
+参数名         是否必须        参数描述
+house_id         是          房屋id
+
+返回结果:
+正确:
+return '{errno=RET.OK,errmsg='OK',data={'user_id':%s,'house':%s}}' %(user_id,house_json)
+
+错误:
+{
+    errno=RET.DBERR,
+    errmsg='获取房屋数据失败'
+}
+
+
+18/房屋列表信息展示
+请求URL:/api/v1.0/houses
+请求方法:GET
+数据格式:json
+请求参数:
+参数名         是否必须        参数描述
+aid             否           用户选择的区域信息(area_id)
+sd              否           用户选择的开始日期(start_date_str)
+ed              否           用户选择的结束日期(end_date_str)
+sk              否           用户选择的排序条件(sort_key),需要给默认值new
+p               否           用户选择的页数(page),需要给默认值1
+
+返回结果:
+正确:一个键对应对应多条数据,hash数据类型存储的是对象
+redis_key = 'houses_%s_%s_%s_%s' %(area_id,start_date_str,end_end_str,sort_key)
+ret = redis_store.hget(redis_key,page)
+return ret
+
+错误:
+{
+    errno=RET.DBERR,
+    errmsg='获取房屋列表数据失败'
+}
